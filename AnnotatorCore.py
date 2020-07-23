@@ -248,6 +248,42 @@ def processalterationevents(eventfile, outfile, previousoutfile, defaultCancerTy
             if hugo=='TERT' and (row[iconsequence]=='5\'Flank' or row[iconsequence]=='5\'UTR'):
                 hgvs = "Promoter Mutations"
 
+            import re
+            conversiondict = {'Ala': 'A',
+                              'Asx': 'B',
+                              'Cys': 'C',
+                              'Asp': 'D',
+                              'Glu': 'E',
+                              'Phe': 'F',
+                              'Gly': 'G',
+                              'His': 'H',
+                              'Ile': 'I',
+                              'Lys': 'K',
+                              'Leu': 'L',
+                              'Met': 'M',
+                              'Asn': 'N',
+                              'Pro': 'P',
+                              'Gln': 'Q',
+                              'Arg': 'R',
+                              'Ser': 'S',
+                              'Thr': 'T',
+                              'Val': 'V',
+                              'Trp': 'W',
+                              'Tyr': 'Y',
+                              'Glx': 'Z'}
+            conversionlst = ['Ala', 'Asx', 'Cys', 'Asp', 'Glu', 'Phe', 'Gly', 'His', 'Ile', 'Lys', 'Leu', 'Met', 'Asn',
+                             'Pro', 'Gln', 'Arg', 'Ser', 'Thr', 'Val', 'Trp', 'Tyr', 'Glx']
+
+            def conversion():
+                threecharactersearch = re.findall('[a-zA-Z]{3}', hgvs, flags=re.IGNORECASE)
+                if threecharactersearch:
+                    if any(letters in hgvs for letters in conversionlst):
+                        for threeletter, oneletter in conversiondict.items():
+                            hgvs = hgvs.replace(threeletter, oneletter)
+                        print(hgvs)
+
+            conversion()
+
             cancertype = defaultCancerType
             if icancertype >= 0:
                 cancertype = row[icancertype]
