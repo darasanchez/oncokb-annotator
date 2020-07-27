@@ -8,7 +8,7 @@ OCNA="data/example_cna.oncokb.txt"
 IC="data/example_clinical.txt"
 OC="data/example_clinical.oncokb.txt"
 OCPDF="data/example_clinical.oncokb.pdf"
-TOKEN="" #OncoKB API Token
+TOKEN="8df5939f-ecbf-4c8b-81a8-60490cdf64b0" #OncoKB API Token
 README="data/example_README.txt"
 python3 MafAnnotator.py -i $IMAF -o $OMAF -c $IC -b $TOKEN
 python3 FusionAnnotator.py -i $IF -o $OF -c $IC -b $TOKEN
