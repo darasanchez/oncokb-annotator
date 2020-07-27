@@ -6,6 +6,7 @@ import requests
 import os.path
 import logging
 import re
+import pydicti
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -175,6 +176,70 @@ def inithotspots():
     curatedgenes |= set(indelsinglehotspots.keys())
     curatedgenes |= set(_3dhotspots.keys())
 
+conversiondict = {'Ala': 'A',
+                  'Asx': 'B',
+                  'Cys': 'C',
+                  'Asp': 'D',
+                  'Glu': 'E',
+                  'Phe': 'F',
+                  'Gly': 'G',
+                  'His': 'H',
+                  'Ile': 'I',
+                  'Lys': 'K',
+                  'Leu': 'L',
+                  'Met': 'M',
+                  'Asn': 'N',
+                  'Pro': 'P',
+                  'Gln': 'Q',
+                  'Arg': 'R',
+                  'Ser': 'S',
+                  'Thr': 'T',
+                  'Val': 'V',
+                  'Trp': 'W',
+                  'Tyr': 'Y',
+                  'Glx': 'Z'
+                  }
+conversionlst = conversiondict.keys()
+def conversion(hgvs):
+    threecharactersearch = re.findall('[a-zA-Z]{3}', hgvs, flags=re.IGNORECASE)
+    if threecharactersearch:
+        if any(letters in hgvs for letters in conversiondict):
+            for threeletter, oneletter in conversiondict.items():
+                hgvs = hgvs.replace(threeletter, oneletter)
+            print(hgvs)
+
+# dicti function from import for case insensitivity
+conversiondict = dicti('Ala'= 'A',
+                  'Asx'= 'B',
+                  'Cys'= 'C',
+                  'Asp'= 'D',
+                  'Glu'= 'E',
+                  'Phe'= 'F',
+                  'Gly'= 'G',
+                  'His'= 'H',
+                  'Ile'= 'I',
+                  'Lys'= 'K',
+                  'Leu'= 'L',
+                  'Met'= 'M',
+                  'Asn'= 'N',
+                  'Pro'= 'P',
+                  'Gln'= 'Q',
+                  'Arg'= 'R',
+                  'Ser'= 'S',
+                  'Thr'= 'T',
+                  'Val'= 'V',
+                  'Trp'= 'W',
+                  'Tyr'= 'Y',
+                  'Glx'= 'Z'
+                  )
+conversionlst = conversiondict.keys()
+def conversion(hgvs):
+    threecharactersearch = re.findall('[a-zA-Z]{3}', hgvs, flags=re.IGNORECASE)
+    if threecharactersearch:
+        if any(letters in hgvs for letters in conversiondict):
+            for threeletter, oneletter in conversiondict.items():
+                hgvs = hgvs.replace(threeletter, oneletter)
+            print(hgvs)
 
 def processalterationevents(eventfile, outfile, previousoutfile, defaultCancerType, cancerTypeMap,
                             retainonlycuratedgenes, annotatehotspots):
@@ -248,42 +313,6 @@ def processalterationevents(eventfile, outfile, previousoutfile, defaultCancerTy
             if hugo=='TERT' and (row[iconsequence]=='5\'Flank' or row[iconsequence]=='5\'UTR'):
                 hgvs = "Promoter Mutations"
 
-            import re
-            conversiondict = {'Ala': 'A',
-                              'Asx': 'B',
-                              'Cys': 'C',
-                              'Asp': 'D',
-                              'Glu': 'E',
-                              'Phe': 'F',
-                              'Gly': 'G',
-                              'His': 'H',
-                              'Ile': 'I',
-                              'Lys': 'K',
-                              'Leu': 'L',
-                              'Met': 'M',
-                              'Asn': 'N',
-                              'Pro': 'P',
-                              'Gln': 'Q',
-                              'Arg': 'R',
-                              'Ser': 'S',
-                              'Thr': 'T',
-                              'Val': 'V',
-                              'Trp': 'W',
-                              'Tyr': 'Y',
-                              'Glx': 'Z'}
-            conversionlst = ['Ala', 'Asx', 'Cys', 'Asp', 'Glu', 'Phe', 'Gly', 'His', 'Ile', 'Lys', 'Leu', 'Met', 'Asn',
-                             'Pro', 'Gln', 'Arg', 'Ser', 'Thr', 'Val', 'Trp', 'Tyr', 'Glx']
-
-            def conversion():
-                threecharactersearch = re.findall('[a-zA-Z]{3}', hgvs, flags=re.IGNORECASE)
-                if threecharactersearch:
-                    if any(letters in hgvs for letters in conversionlst):
-                        for threeletter, oneletter in conversiondict.items():
-                            hgvs = hgvs.replace(threeletter, oneletter)
-                        print(hgvs)
-
-            conversion()
-
             cancertype = defaultCancerType
             if icancertype >= 0:
                 cancertype = row[icancertype]
@@ -292,6 +321,8 @@ def processalterationevents(eventfile, outfile, previousoutfile, defaultCancerTy
             if cancertype == "":
                 log.info("Cancer type for all samples must be defined\nline %s: %s" % (i, row))
                 # continue
+
+            conversion(hgvs)
 
             start = None
             if istart >= 0 and row[istart] != 'NULL' and row[istart] != '':
