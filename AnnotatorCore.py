@@ -203,10 +203,8 @@ def conversion(hgvs):
     threecharactersearch = re.findall('[a-zA-Z]{3}', hgvs, flags=re.IGNORECASE)
     if threecharactersearch:
         if any(letters in hgvs for letters in conversionlst):
-            for threeletter, oneletter in conversiondict.items():
-                hgvs = hgvs.replace(threeletter, oneletter)
-            print(hgvs)
-def ReplaceAll(conv, hgvs):
+            replace_all(hgvs)
+def replace_all(conv, hgvs):
     pattern = re.compile('|'.join(conv), re.IGNORECASE)
     return pattern.sub(lambda m: conv[m.group()], hgvs)
 
@@ -247,7 +245,7 @@ def processalterationevents(eventfile, outfile, previousoutfile, defaultCancerTy
 
         ihugo = geIndexOfHeader(headers, ['HUGO_SYMBOL', 'HUGO_GENE_SYMBOL'])
         iconsequence = geIndexOfHeader(headers, ['VARIANT_CLASSIFICATION', 'MUTATION_TYPE'])
-        ihgvs = geIndexOfHeader(headers, ['ALTERATION', 'HGVSP_SHORT', 'AMINO_ACID_CHANGE', 'FUSION'])
+        ihgvs = geIndexOfHeader(headers, ['ALTERATION', 'HGVSP', 'HGVSP_SHORT', 'AMINO_ACID_CHANGE', 'FUSION'])
         isample = geIndexOfHeader(headers, ['SAMPLE_ID', 'TUMOR_SAMPLE_BARCODE'])
         istart = geIndexOfHeader(headers, ['PROTEIN_START'])
         iend = geIndexOfHeader(headers, ['PROTEIN_END'])
@@ -549,7 +547,7 @@ def processclinicaldata(annotatedmutfiles, clinicalfile, outfile):
 
             ihugo = geIndexOfHeader(headers, ['HUGO_SYMBOL', 'HUGO_GENE_SYMBOL'])
             iconsequence = geIndexOfHeader(headers, ['VARIANT_CLASSIFICATION', 'MUTATION_TYPE'])
-            ihgvs = geIndexOfHeader(headers, ['ALTERATION', 'HGVSP_SHORT', 'AMINO_ACID_CHANGE', 'AA_CHANGE', 'FUSION'])
+            ihgvs = geIndexOfHeader(headers, ['ALTERATION', 'HGVSP', 'HGVSP_SHORT', 'AMINO_ACID_CHANGE', 'FUSION'])
             isample = geIndexOfHeader(headers, ['SAMPLE_ID', 'TUMOR_SAMPLE_BARCODE'])
             istart = geIndexOfHeader(headers, ['PROTEIN_START'])
             iend = geIndexOfHeader(headers, ['PROTEIN_END'])
@@ -813,7 +811,7 @@ def processmutationdata(mutfile, outfile, clinicaldata):
 
         ihugo = headers['Hugo_Symbol']
         iconsequence = headers['Consequence']
-        ihgvs = headers['HGVSp_Short']
+        ihgvs = headers['HGVSp', 'HGVSp_Short']
         isample = headers['Tumor_Sample_Barcode']
         istart = headers['protein_start']
         iend = headers['protein_end']
@@ -865,7 +863,7 @@ def cacheannotated(annotatedfile, defaultCancerType, cancerTypeMap):
 
             ihugo = geIndexOfHeader(headers, ['HUGO_SYMBOL', 'HUGO_GENE_SYMBOL'])
             iconsequence = geIndexOfHeader(headers, ['VARIANT_CLASSIFICATION', 'MUTATION_TYPE'])
-            ihgvs = geIndexOfHeader(headers, ['ALTERATION', 'HGVSP_SHORT', 'AMINO_ACID_CHANGE', 'AA_CHANGE', 'FUSION'])
+            ihgvs = geIndexOfHeader(headers, ['ALTERATION', 'HGVSP', 'HGVSP_SHORT', 'AMINO_ACID_CHANGE', 'FUSION'])
             isample = geIndexOfHeader(headers, ['SAMPLE_ID', 'TUMOR_SAMPLE_BARCODE'])
             istart = geIndexOfHeader(headers, ['PROTEIN_START'])
             iend = geIndexOfHeader(headers, ['PROTEIN_END'])
