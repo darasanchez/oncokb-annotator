@@ -6,12 +6,11 @@ import requests
 import os.path
 import logging
 import re
-import pydicti
+from pydicti import dicti
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from datetime import date
-
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -203,43 +202,13 @@ conversionlst = conversiondict.keys()
 def conversion(hgvs):
     threecharactersearch = re.findall('[a-zA-Z]{3}', hgvs, flags=re.IGNORECASE)
     if threecharactersearch:
-        if any(letters in hgvs for letters in conversiondict):
+        if any(letters in hgvs for letters in conversionlst):
             for threeletter, oneletter in conversiondict.items():
                 hgvs = hgvs.replace(threeletter, oneletter)
             print(hgvs)
-
-# dicti function from import for case insensitivity
-conversiondict = dicti('Ala'= 'A',
-                  'Asx'= 'B',
-                  'Cys'= 'C',
-                  'Asp'= 'D',
-                  'Glu'= 'E',
-                  'Phe'= 'F',
-                  'Gly'= 'G',
-                  'His'= 'H',
-                  'Ile'= 'I',
-                  'Lys'= 'K',
-                  'Leu'= 'L',
-                  'Met'= 'M',
-                  'Asn'= 'N',
-                  'Pro'= 'P',
-                  'Gln'= 'Q',
-                  'Arg'= 'R',
-                  'Ser'= 'S',
-                  'Thr'= 'T',
-                  'Val'= 'V',
-                  'Trp'= 'W',
-                  'Tyr'= 'Y',
-                  'Glx'= 'Z'
-                  )
-conversionlst = conversiondict.keys()
-def conversion(hgvs):
-    threecharactersearch = re.findall('[a-zA-Z]{3}', hgvs, flags=re.IGNORECASE)
-    if threecharactersearch:
-        if any(letters in hgvs for letters in conversiondict):
-            for threeletter, oneletter in conversiondict.items():
-                hgvs = hgvs.replace(threeletter, oneletter)
-            print(hgvs)
+def ReplaceAll(conv, hgvs):
+    pattern = re.compile('|'.join(conv), re.IGNORECASE)
+    return pattern.sub(lambda m: conv[m.group()], hgvs)
 
 def processalterationevents(eventfile, outfile, previousoutfile, defaultCancerType, cancerTypeMap,
                             retainonlycuratedgenes, annotatehotspots):
