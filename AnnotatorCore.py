@@ -140,7 +140,7 @@ def makeoncokbrequest(url):
         'Content-Type': 'application/json',
         'Authorization': 'Bearer %s' % oncokbapibearertoken
     }
-    return requests.get(url, headers=headers)
+    return requests.post(url, headers=headers)
 
 
 def getcuratedgenes():
@@ -258,7 +258,7 @@ def processalterationevents(eventfile, outfile, previousoutfile, defaultCancerTy
         i = 0
         for row in reader:
             i = i + 1
-            if i % 100 == 0:
+            if i % 50 == 0:
                 log.info(i)
 
             row = padrow(row, ncols)
@@ -383,7 +383,7 @@ def processsv(svdata, outfile, previousoutfile, defaultCancerType, cancerTypeMap
         i = 0
         for row in reader:
             i = i + 1
-            if i % 100 == 0:
+            if i % 50 == 0:
                 log.info(i)
 
             row = padrow(row, ncols)
@@ -475,7 +475,7 @@ def processcnagisticdata(cnafile, outfile, previousoutfile, defaultCancerType, c
         i = 0
         for row in reader:
             i = i + 1
-            if i % 100 == 0:
+            if i % 50 == 0:
                 log.info(i)
 
             hugo = row[0]
@@ -819,7 +819,7 @@ def processmutationdata(mutfile, outfile, clinicaldata):
 
         i = 0
         for row in reader:
-            if i % 100 == 0:
+            if i % 50 == 0:
                 log.info(i)
             i = i + 1
 
@@ -961,7 +961,11 @@ def appendoncokbcitations(citations, pmids, abstracts):
     return citations
 
 
-def pull_mutation_info(hugo, protein_change, consequence, start, end, cancer_type):
+class RandomName:
+    def __init__(self, comp_name):
+        self.comp_name = comp_name
+
+def pull_mutation_info(content):
     url = oncokbapiurl + '/annotate/mutations/byProteinChange?'
     url += 'hugoSymbol=' + hugo
     url += '&alteration=' + protein_change
@@ -973,6 +977,16 @@ def pull_mutation_info(hugo, protein_change, consequence, start, end, cancer_typ
     if end and end != '\\N' and end != 'NULL' and end != '':
         url += '&proteinEnd=' + str(end)
     key = '-'.join([hugo, protein_change, cancer_type])
+    h = requests.post(url)
+    content = []
+    content.append(RandomName(hugo, row[ihugo]))
+    content.append(RandomName(protein_change, row[iproteinpos]))
+    # the protein one looks wrong; not sure if they are supposed to be the same
+    content.append(RandomName(consequence, row[inconsequence]))
+    content.append(RandomName(start, row[istart]))
+    content.append(RandomName(end, row[iend]))
+    content.append(RandomName(cancertype, row[icancertype]))
+# I need to add the content of the row in there; not sure if this works
     return pulloncokb(key, url)
 
 
