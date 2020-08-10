@@ -262,8 +262,8 @@ def processalterationevents(eventfile, outfile, previousoutfile, defaultCancerTy
                 log.info(i)
 
             row = padrow(row, ncols)
-
             sample = getsampleid(row[isample])
+            pull_mutation_info(component)
             if sampleidsfilter and sample not in sampleidsfilter:
                 continue
 
@@ -961,11 +961,21 @@ def appendoncokbcitations(citations, pmids, abstracts):
     return citations
 
 
-class RandomName:
-    def __init__(self, comp_name):
-        self.comp_name = comp_name
 
-def pull_mutation_info(content):
+class MyClass:
+    def __init__(self, hugo, protein_change, consequence, start, end, cancer_type):
+        self.hugo = hugo
+        self.protein_change = protein_change
+        self.consequence = consequence
+        self.start = start
+        self.end = end
+        self.cancer_type = cancer_type
+component = []
+component.append(MyClass('h', 2, 4, 6, 6, 7))
+component.append(MyClass('z', 5, 4, 0, 6, 7))
+component.append(MyClass('a', 2, 6, 9, 6, 7))
+
+def pull_mutation_info(component):
     url = oncokbapiurl + '/annotate/mutations/byProteinChange?'
     url += 'hugoSymbol=' + hugo
     url += '&alteration=' + protein_change
@@ -977,16 +987,8 @@ def pull_mutation_info(content):
     if end and end != '\\N' and end != 'NULL' and end != '':
         url += '&proteinEnd=' + str(end)
     key = '-'.join([hugo, protein_change, cancer_type])
-    h = requests.post(url)
-    content = []
-    content.append(RandomName(hugo, row[ihugo]))
-    content.append(RandomName(protein_change, row[iproteinpos]))
-    # the protein one looks wrong; not sure if they are supposed to be the same
-    content.append(RandomName(consequence, row[inconsequence]))
-    content.append(RandomName(start, row[istart]))
-    content.append(RandomName(end, row[iend]))
-    content.append(RandomName(cancertype, row[icancertype]))
-# I need to add the content of the row in there; not sure if this works
+    for component_results in component:
+        row.append(oncokbinfo)
     return pulloncokb(key, url)
 
 
