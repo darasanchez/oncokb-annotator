@@ -135,12 +135,12 @@ def gethotspots(url, type):
     return hotspots
 
 
-def makeoncokbrequest(url):
+def makeoncokbrequest(url, body):
     headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer %s' % oncokbapibearertoken
     }
-    return requests.post(url, headers=headers)
+    return requests.post(url, headers=headers, body=)
 
 
 def getcuratedgenes():
@@ -961,7 +961,6 @@ def appendoncokbcitations(citations, pmids, abstracts):
     return citations
 
 
-
 class MyClass:
     def __init__(self, hugo, protein_change, consequence, start, end, cancer_type):
         self.hugo = hugo
@@ -971,24 +970,24 @@ class MyClass:
         self.end = end
         self.cancer_type = cancer_type
 component = []
-component.append(MyClass('h', 2, 4, 6, 6, 7))
-component.append(MyClass('z', 5, 4, 0, 6, 7))
-component.append(MyClass('a', 2, 6, 9, 6, 7))
+component.append(MyClass(1, 2, 3, 4, 5, 6,))
 
-def pull_mutation_info(component):
-    url = oncokbapiurl + '/annotate/mutations/byProteinChange?'
-    url += 'hugoSymbol=' + hugo
-    url += '&alteration=' + protein_change
-    url += '&tumorType=' + cancer_type
-    if consequence:
-        url += '&consequence=' + consequence
-    if start and start != '\\N' and start != 'NULL' and start != '':
-        url += '&proteinStart=' + str(start)
-    if end and end != '\\N' and end != 'NULL' and end != '':
-        url += '&proteinEnd=' + str(end)
-    key = '-'.join([hugo, protein_change, cancer_type])
-    for component_results in component:
-        row.append(oncokbinfo)
+def pull_mutation_info([hugo, protein_change, consequence, start, end, cancer_type]):
+    url = 'https://www.oncokb.org/api/v1/annotate/mutations/byProteinChange'
+    data = [
+  {
+    "alteration": "V600E",
+    "gene": {
+      "hugoSymbol": "BRAF"
+    },
+    "tumorType": "Melanoma"
+  }
+]
+    r = requests.post(url, body=data)
+    return r
+    # how to pass a list to the API call and get a response back
+    for r in component:
+        component.append(MyClass(hugo='hugo', protein_change='protein_change', consequence='consequence', start='start', end='end', cancer_type='cancer_type'))
     return pulloncokb(key, url)
 
 
