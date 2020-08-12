@@ -140,7 +140,8 @@ def makeoncokbrequest(url, body):
         'Content-Type': 'application/json',
         'Authorization': 'Bearer %s' % oncokbapibearertoken
     }
-    return requests.post(url, headers=headers, body=)
+    body = Query
+    return requests.post(url, headers=headers, body=body)
 
 
 def getcuratedgenes():
@@ -259,11 +260,24 @@ def processalterationevents(eventfile, outfile, previousoutfile, defaultCancerTy
         for row in reader:
             i = i + 1
             if i % 50 == 0:
-                log.info(i)
-
+                log.info(queries)
+                queries = []
             row = padrow(row, ncols)
             sample = getsampleid(row[isample])
-            pull_mutation_info(component)
+            pull_mutation_info(queries)
+
+            class Gene:
+                def __init__(self, hugo):
+                    self.hugoSymbol = hugo
+
+            class Query:
+                def __init__(self, hugo, protein_change, consequence, start, end, cancer_type):
+                    self.gene = Gene(hugo)
+                    self.proteinChange = protein_change
+                    self.consequence = consequence
+                    self.proteinStart = start
+                    self.proteinEnd = end
+                    self.tumorType = cancer_type
             if sampleidsfilter and sample not in sampleidsfilter:
                 continue
 
@@ -327,7 +341,7 @@ def processalterationevents(eventfile, outfile, previousoutfile, defaultCancerTy
 
 
             if not retainonlycuratedgenes or hugo in curatedgenes:
-                oncokbinfo = pull_mutation_info(hugo, hgvs, consequence, start, end, cancertype)
+                oncokbinfo = pull_mutation_info(queries)
                 row.append(oncokbinfo)
             else:
                 # Include Gene in OncoKB and Variant in OncoKB
@@ -846,7 +860,8 @@ def processmutationdata(mutfile, outfile, clinicaldata):
 
             if sample in clinicaldata:
                 cancertype = clinicaldata[sample]
-            oncokbevidences = pull_mutation_info(hugo, hgvs, consequence, start, end, cancertype)
+            oncokbevidences = pull_mutation_info(queries)
+            queries = []
             annotatedrow = [hugo, consequence, start, end, hgvs, sample, cancertype, oncokbevidences]
             outf.write('\t'.join(annotatedrow) + "\n")
 
@@ -961,34 +976,25 @@ def appendoncokbcitations(citations, pmids, abstracts):
     return citations
 
 
-class MyClass:
+class Gene:
+    def __init__(self, hugo):
+        self.hugoSymbol=hugo
+class Query:
     def __init__(self, hugo, protein_change, consequence, start, end, cancer_type):
-        self.hugo = hugo
-        self.protein_change = protein_change
+        self.gene = Gene(hugo)
+        self.proteinChange = protein_change
         self.consequence = consequence
-        self.start = start
-        self.end = end
-        self.cancer_type = cancer_type
-component = []
-component.append(MyClass(1, 2, 3, 4, 5, 6,))
+        self.proteinStart = start
+        self.proteinEnd = end
+        self.tumorType = cancer_type
 
-def pull_mutation_info([hugo, protein_change, consequence, start, end, cancer_type]):
+
+def pull_mutation_info(queries):
     url = 'https://www.oncokb.org/api/v1/annotate/mutations/byProteinChange'
-    data = [
-  {
-    "alteration": "V600E",
-    "gene": {
-      "hugoSymbol": "BRAF"
-    },
-    "tumorType": "Melanoma"
-  }
-]
-    r = requests.post(url, body=data)
-    return r
-    # how to pass a list to the API call and get a response back
-    for r in component:
-        component.append(MyClass(hugo='hugo', protein_change='protein_change', consequence='consequence', start='start', end='end', cancer_type='cancer_type'))
-    return pulloncokb(key, url)
+    req = requests.post(url, body=queries)
+#   for req in queries:
+#       queries.append(Query)
+    return pulloncokb(key, url, queries)
 
 
 def pull_cna_info(hugo, copy_name_alteration_type, cancer_type):
@@ -1018,12 +1024,11 @@ def pullStructuralVariantInfo(gene1, gene2, structural_variant_type, cancer_type
     return pulloncokb(key, url);
 
 
-def pulloncokb(key, url):
+def pulloncokb(key, url, queries):
     if key not in oncokbcache:
         oncokbdata = {}
         for l in levels:
             oncokbdata[l] = []
-
         oncokbdata[GENE_IN_ONCOKB_HEADER] = GENE_IN_ONCOKB_DEFAULT
         oncokbdata[VARIANT_IN_ONCOKB_HEADER] = VARIANT_IN_ONCOKB_DEFAULT
         oncokbdata['mutation_effect'] = ""
@@ -1097,6 +1102,9 @@ def pulloncokb(key, url):
     ret = "\t".join(ret)
     ret = ret.encode('ascii', 'ignore').decode('ascii')  # ignore unicode
     return ret
+
+    queries = []
+    queries.append(oncokbdata)
 
 def gethighestsensitivitylevel(oncokbdata):
     r1 = set()
